@@ -3,6 +3,8 @@
 **AI Product Builder · AI Automation · Rapid Prototyping**  
 Ramat Gan, Israel · open to Israel / remote roles
 
+**[Interactive portfolio →](https://arsenyperelportfolio.lovable.app)**
+
 I turn ambiguous product ideas into working, verifiable systems using AI-assisted development.
 
 My strongest work is not “prompt once and hope.” I define the target, decompose the problem, direct coding and research agents, inspect what they produced, diagnose failures, and keep iterating until the result can be checked against evidence.
@@ -36,6 +38,7 @@ Working environment: Git / GitHub · React / TypeScript · JavaScript / Node · 
 
 ## Portfolio
 
-The interactive portfolio source is public at **[aisarus/arseny-portfolio](https://github.com/aisarus/arseny-portfolio)**. A live link will be added here after the release deployment.
+**Live:** [arsenyperelportfolio.lovable.app](https://arsenyperelportfolio.lovable.app)  
+**Source:** [aisarus/arseny-portfolio](https://github.com/aisarus/arseny-portfolio)
 
 **Contact:** [arielperseny@gmail.com](mailto:arielperseny@gmail.com)
