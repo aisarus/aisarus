@@ -3,7 +3,7 @@
 **AI Product Builder · AI Automation · Rapid Prototyping**  
 Ramat Gan, Israel · open to Israel / remote roles
 
-**[Interactive portfolio →](https://arseny-perel.lovable.app)**
+**[Interactive portfolio →](https://arseny-perel.lovable.app)** · **[CV →](https://arseny-perel.lovable.app/cv)**
 
 I turn ambiguous product ideas into working, verifiable systems using AI-assisted development.
 
