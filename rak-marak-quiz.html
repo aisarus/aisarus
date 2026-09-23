@@ -54,6 +54,25 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
 .next{background:var(--accent);color:var(--accent-ink);border:0;font:inherit;font-weight:700;padding:12px 22px;border-radius:10px;cursor:pointer}
 .bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--line);padding:4px;border-radius:12px}
+.modes button{border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;padding:10px;border-radius:9px;cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.modes button:focus-visible,.chip:focus-visible,.btn2:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.chip{display:flex;flex-direction:column;gap:2px;text-align:right;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;position:relative}
+.chip .he{font-weight:600;font-size:16px;display:block}
+.chip .ru{color:var(--muted);font-size:13px;text-align:left;direction:ltr;display:block}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
+.chip.ok{border-color:var(--good);background:var(--good-bg)}
+.chip.no{border-color:var(--bad);background:var(--bad-bg);text-decoration:line-through}
+.chip.miss{border:2px dashed var(--good);background:var(--card)}
+.chip.miss::after{content:"пропущено";position:absolute;top:6px;left:8px;font-size:10px;color:var(--good);font-family:"Noto Sans Mono",monospace}
+.chip.dim{opacity:.45}
+.chip:disabled{cursor:default}
+.btn2{background:transparent;color:var(--ink);border:1.5px solid var(--line);font:inherit;font-weight:600;padding:12px 18px;border-radius:10px;cursor:pointer}
+.need{font-family:"Noto Sans Mono",ui-monospace,monospace;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.need b{color:var(--ink)}
+.score{font-size:15px}
 .foot{font-size:12px;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -71,6 +90,27 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
     </div>
   </header>
 
+  <div class="modes" role="group" aria-label="Режим">
+    <button id="mode-find" aria-pressed="true">Что есть в меню</button>
+    <button id="mode-quiz" aria-pressed="false">Вопросы</button>
+  </div>
+
+  <div id="findWrap" style="display:contents">
+  <div class="cats" id="fcats" role="group" aria-label="Раздел"></div>
+  <section class="card" id="fcard">
+    <div class="tag" id="ftag"></div>
+    <div class="q" id="fq"></div>
+    <div class="need" id="fneed"></div>
+    <div class="grid" id="fgrid"></div>
+    <div class="explain score" id="fres" hidden></div>
+    <div class="row">
+      <button class="btn2" id="fnext">Следующий раздел →</button>
+      <button class="next" id="fcheck">Проверить</button>
+    </div>
+  </section>
+  </div>
+
+  <div id="quizWrap" style="display:contents" hidden>
   <div class="cats" id="cats" role="group" aria-label="Тема"></div>
   <div class="bar" aria-hidden="true"><i id="bar" style="width:0%"></i></div>
 
@@ -84,8 +124,9 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
       <button class="next" id="next" hidden>Дальше →</button>
     </div>
   </section>
+  </div>
 
-  <div class="foot">Вопросы генерируются случайно по реальному меню. Цены — ₪.</div>
+  <div class="foot">Всё по реальному меню Rak Marak. Цены — ₪.</div>
 </div>
 
 <script>
@@ -267,8 +308,85 @@ CATS.forEach(([k,l])=>{
 });
 $('next').onclick=newQ;
 document.addEventListener('keydown',e=>{
+  if(mode!=='quiz')return;
   if(!answered&&/^[1-4]$/.test(e.key)&&cur.opts[+e.key-1]) answer(+e.key-1);
   else if(answered&&(e.key==='Enter'||e.key===' ')&&document.activeElement!==$('next')){e.preventDefault();newQ()}
 });
 stats(); newQ();
+// ---------- «Что есть в меню» ----------
+const SECTIONS=[
+  {k:'soups',t:'Супы',q:'Какие супы есть в меню?',he:'המרקים',real:SOUPS.map(x=>x.n),fake:[
+    T('מרק בצל','луковый суп'),T('מרק פטריות','грибной суп'),T('מרק ברוקולי','суп из брокколи'),T('מרק שעועית','фасолевый суп'),
+    T('מרק מינסטרונה','минестроне'),T('מרק כרובית','суп из цветной капусты'),T('מרק סלק','свекольный суп'),T('מרק קישואים','кабачковый суп'),
+    T('מרק תפוחי אדמה','картофельный суп'),T('מרק גולאש','гуляш-суп'),T('מרק תרד','шпинатный суп')]},
+  {k:'mixes',t:'Миксы',q:'Какие миксы — «рекомендованные» (המומלצים שלנו)?',he:'MIX IT UP',real:MIXES,fake:FAKE_MIXES.concat([
+    T('מיקס תירס ועדשים','микс: кукурузный + чечевичный'),T('מיקס אפונה וחרירה','микс: гороховый + харира'),T('מיקס "עוף" וכתומים','микс: «куриный» + оранжевый'),T('מיקס עגבניות ועדשים','микс: томатный + чечевичный')])},
+  {k:'patties',t:'Овощные котлеты',q:'Какие овощные котлеты (+ тофу) есть в меню?',he:'קציצות ירק',real:PATTIES.map(x=>x.n).concat([T('טופו צרוב','обжаренный тофу')]),fake:[
+    T('קציצת עדשים','чечевичная котлета'),T('קציצת תרד','шпинатная котлета'),T('קציצת בטטה','котлета из батата'),T('קציצת קישואים','кабачковая котлета'),
+    T('קציצת פטריות','грибная котлета'),T('קציצת גזר','морковная котлета'),T('פלאפל','фалафель'),T('קציצת כרוב','капустная котлета'),T('קציצת תירס','кукурузная котлета'),T('טופו מעושן','копчёный тофу')]},
+  {k:'protein',t:'Белковые котлеты',q:'Какие вкусы у белковых котлет на основе гороха?',he:'קציצת חלבון על בסיס אפונה',real:PROTEIN.map(x=>x.n),fake:[
+    T('קציצת "הודו"','«индюшачья»'),T('קציצת "כבש"','«баранья»'),T('קציצת "טונה"','«тунцовая»'),T('קציצת "סלמון"','«лососевая»'),T('קציצת "שרימפס"','«креветочная»'),T('קציצת "חזיר"','«свиная»')]},
+  {k:'sides',t:'Гарниры',q:'Какие гарниры есть в «תוספת קטנית ופחמימה»?',he:'תוספת קטנית ופחמימה',real:SIDES.map(x=>x.n),fake:[
+    T('פירה','пюре'),T('בורגול','булгур'),T('פתיתים','птитим'),T('פסטה','паста'),T('צ\'יפס','картофель фри'),T('אורז מלא','бурый рис'),
+    T('תפו"א אפויים','печёный картофель'),T('פריקה','фрике'),T('עדשים שחורות','чёрная чечевица'),T('אורז צהוב','жёлтый рис')]},
+  {k:'extras',t:'Добавки',q:'Какие доп. добавки (תוספת נוספת) есть в меню?',he:'תוספת נוספת',real:EXTRAS.map(x=>x.n),fake:[
+    T('שמנת חמוצה','сметана'),T('גבינה מגורדת','тёртый сыр'),T('זיתים','оливки'),T('חומוס','хумус'),T('רוטב חריף','острый соус'),
+    T('לחם שום','чесночный хлеб'),T('פיתה','пита'),T('קרקרים','крекеры'),T('אבוקדו','авокадо')]},
+  {k:'drinks',t:'Напитки',q:'Какие напитки есть в меню?',he:'שתיה קלה',real:[
+    T('סודה','содовая'),T('מים מינרליים','минеральная вода'),T('קוקה קולה','кока-кола'),T('קולה זירו','кола зеро'),T('ספרייט','спрайт'),T('ספרייט זירו','спрайт зеро'),
+    T('מים בטעם תפוח','вода со вкусом яблока'),T('מים בטעם ענבים','вода со вкусом винограда'),T('מים בטעם אפרסק','вода со вкусом персика'),T('פיוזטי אפרסק','фьюзти персик')],fake:[
+    T('פאנטה','фанта'),T('תה קר','холодный чай'),T('מיץ תפוזים','апельсиновый сок'),T('לימונדה','лимонад'),T('בירה','пиво'),T('פיוזטי לימון','фьюзти лимон'),T('מים בטעם לימון','вода со вкусом лимона'),T('קפה','кофе')]},
+  {k:'desserts',t:'Десерты',q:'Какие десерты (קינוחים) есть в меню?',he:'קינוחים',real:DESSERTS.map(x=>x.n),fake:[
+    T('עוגת גבינה','чизкейк'),T('בראוניז','брауни'),T('מלבי','малаби'),T('טירמיסו','тирамису'),T('סופלה שוקולד','шоколадное суфле'),T('פאי תפוחים','яблочный пирог')]},
+];
+const TOTAL=15;
+let sec=SECTIONS[0], fItems=[], fChecked=false;
+function buildFind(){
+  const nFake=Math.max(0,Math.min(sec.fake.length,TOTAL-sec.real.length));
+  fItems=shuffle(sec.real.map(x=>({...x,ok:true})).concat(shuffle(sec.fake).slice(0,nFake).map(x=>({...x,ok:false}))));
+  fChecked=false;
+  $('ftag').textContent=sec.t;
+  $('fq').innerHTML=sec.q+`<span class="he" dir="rtl">${sec.he}</span>`;
+  $('fgrid').innerHTML='';
+  fItems.forEach((it,i)=>{
+    const b=document.createElement('button');b.className='chip';b.id='chip'+i;b.setAttribute('aria-pressed','false');
+    b.innerHTML=renderText(it);
+    b.onclick=()=>{if(fChecked)return;b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');need()};
+    $('fgrid').appendChild(b);
+  });
+  $('fres').hidden=true;$('fcheck').textContent='Проверить';
+  need();
+}
+function need(){
+  const sel=[...$('fgrid').children].filter(b=>b.getAttribute('aria-pressed')==='true').length;
+  $('fneed').innerHTML=`Настоящих: <b>${sec.real.length}</b> из ${fItems.length} · выбрано <b>${sel}</b>`;
+}
+function checkFind(){
+  if(fChecked){buildFind();return}
+  fChecked=true;let hit=0,wrong=0;
+  [...$('fgrid').children].forEach((b,i)=>{
+    const sel=b.getAttribute('aria-pressed')==='true',it=fItems[i];b.disabled=true;
+    if(sel&&it.ok){b.classList.add('ok');hit++}
+    else if(sel&&!it.ok){b.classList.add('no');wrong++}
+    else if(!sel&&it.ok)b.classList.add('miss');
+    else b.classList.add('dim');
+  });
+  const perfect=hit===sec.real.length&&!wrong;
+  $('fres').innerHTML=(perfect?'<strong>Идеально!</strong> ':`<strong>Угадано ${hit} из ${sec.real.length}</strong>${wrong?`, лишних ${wrong}`:''}. `)+
+    'Правильно: '+sec.real.map(x=>`${x.he} (${x.ru})`).join(' · ');
+  $('fres').hidden=false;$('fcheck').textContent='Ещё раз';
+}
+SECTIONS.forEach(S=>{
+  const b=document.createElement('button');b.id='fcat-'+S.k;b.textContent=S.t;b.setAttribute('aria-pressed',S===sec);
+  b.onclick=()=>{sec=S;document.querySelectorAll('#fcats button').forEach(x=>x.setAttribute('aria-pressed',x===b));buildFind()};
+  $('fcats').appendChild(b);
+});
+$('fcheck').onclick=checkFind;
+$('fnext').onclick=()=>{const i=(SECTIONS.indexOf(sec)+1)%SECTIONS.length;$('fcat-'+SECTIONS[i].k).click()};
+let mode='find';
+function setMode(m){mode=m;$('findWrap').hidden=m!=='find';$('quizWrap').hidden=m!=='quiz';
+  $('mode-find').setAttribute('aria-pressed',m==='find');$('mode-quiz').setAttribute('aria-pressed',m==='quiz')}
+$('mode-find').onclick=()=>setMode('find');$('mode-quiz').onclick=()=>setMode('quiz');
+buildFind();
+
 </script>
