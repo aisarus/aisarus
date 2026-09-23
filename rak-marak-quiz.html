@@ -1,0 +1,274 @@
+<title>Rak Marak Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&family=Noto+Sans+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --paper:#EEF1EA; --card:#FBFCF8; --ink:#1B2420; --muted:#5E6B63; --line:#D3DACF;
+  --accent:#2E6A4C; --accent-ink:#FFFFFF; --soft:#DCE8DF;
+  --good:#1F7A45; --good-bg:#DDF2E4; --bad:#B23A2E; --bad-bg:#F8E0DC; --hl:#E7C35A;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#141A17; --card:#1C2420; --ink:#E7EDE8; --muted:#9AA8A0; --line:#2F3A34;
+    --accent:#6DBF93; --accent-ink:#0E1512; --soft:#243A2E;
+    --good:#7FD6A0; --good-bg:#1D3A29; --bad:#F09A8F; --bad-bg:#3E2320; --hl:#D9B64E;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#141A17; --card:#1C2420; --ink:#E7EDE8; --muted:#9AA8A0; --line:#2F3A34;
+  --accent:#6DBF93; --accent-ink:#0E1512; --soft:#243A2E;
+  --good:#7FD6A0; --good-bg:#1D3A29; --bad:#F09A8F; --bad-bg:#3E2320; --hl:#D9B64E;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:Rubik,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45;padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.08em;font-size:26px;line-height:1}
+.brand span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.stats{display:flex;gap:14px;font-family:"Noto Sans Mono",ui-monospace,monospace;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:600}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.cats button{border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:6px 12px;border-radius:999px;cursor:pointer}
+.cats button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.tag{font-family:"Noto Sans Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.q{font-size:20px;font-weight:500;text-wrap:balance}
+.q .he{display:block;font-size:22px;font-weight:700;margin-top:6px}
+.he{direction:rtl;text-align:right;unicode-bidi:isolate}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;flex-direction:column;gap:2px;width:100%;text-align:right;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:12px 14px;border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.cats button:focus-visible,.next:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.opt .he{font-weight:500;font-size:17px;display:block}
+.opt .ru{color:var(--muted);font-size:14px;text-align:left;direction:ltr;display:block}
+.opt.plain .main{font-size:18px;font-weight:600;text-align:left;font-variant-numeric:tabular-nums}
+.opt.ok{border-color:var(--good);background:var(--good-bg)}
+.opt.no{border-color:var(--bad);background:var(--bad-bg)}
+.opt:disabled{cursor:default}
+.explain{border-top:1px dashed var(--line);padding-top:12px;font-size:14px;color:var(--muted)}
+.explain strong{color:var(--ink)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.next{background:var(--accent);color:var(--accent-ink);border:0;font:inherit;font-weight:700;padding:12px 22px;border-radius:10px;cursor:pointer}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.foot{font-size:12px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand">RAK<span>·</span>MARAK</div>
+      <div class="sub">Квиз по меню · רק מרק</div>
+    </div>
+    <div class="stats">
+      <div>верно <b id="sOk">0</b>/<b id="sAll">0</b></div>
+      <div>серия <b id="sStreak">0</b></div>
+      <div>рекорд <b id="sBest">0</b></div>
+    </div>
+  </header>
+
+  <div class="cats" id="cats" role="group" aria-label="Тема"></div>
+  <div class="bar" aria-hidden="true"><i id="bar" style="width:0%"></i></div>
+
+  <section class="card" id="card" aria-live="polite">
+    <div class="tag" id="tag"></div>
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+    <div class="explain" id="explain" hidden></div>
+    <div class="row">
+      <span class="tag" id="hint">Выбери ответ · клавиши 1–4</span>
+      <button class="next" id="next" hidden>Дальше →</button>
+    </div>
+  </section>
+
+  <div class="foot">Вопросы генерируются случайно по реальному меню. Цены — ₪.</div>
+</div>
+
+<script>
+const T=(he,ru)=>({he,ru});
+
+const SOUPS=[
+  {n:T('מרק עדשים','суп из чечевицы'), i:T('עדשים כתומות, בצל לבן, גזר, כרישה, שום ועגבניות','красная чечевица, белый лук, морковь, лук-порей, чеснок и помидоры')},
+  {n:T('מרק תירס','кукурузный суп'), i:T('תירס, בצל לבן וכרישה','кукуруза, белый лук и лук-порей')},
+  {n:T('מרק אפונה','гороховый суп'), i:T('אפונה יבשה, אפונת גינה, שום, גזר, בצל ובזיליקום','сухой горох, зелёный горошек, чеснок, морковь, лук и базилик')},
+  {n:T('מרק חרירה פיקנטי','острый суп харира'), i:T('עדשים ירוקות, עגבניות, גרגרי חומוס, בצל לבן, סלרי וכוסברה','зелёная чечевица, помидоры, нут, белый лук, сельдерей и кинза')},
+  {n:T('מרק עגבניות','томатный суп'), i:T('עגבניות, סלרי, בצל וטימין','помидоры, сельдерей, лук и тимьян')},
+  {n:T('מרק כתומים אסיאתי','азиатский «оранжевый» суп'), i:T('בטטה, דלעת, גזר, בצל לבן, כרישה וג\'ינג\'ר','батат, тыква, морковь, белый лук, лук-порей и имбирь')},
+  {n:T('מרק "עוף" צח','прозрачный «куриный» суп (без курицы)'), i:T('שורש סלרי, שורש פטרוזיליה, שומר, גזר, גבעול סלרי, עגבניה, בצל, פטרוזיליה ושמיר','корень сельдерея, корень петрушки, фенхель, морковь, стебель сельдерея, помидор, лук, петрушка и укроп')},
+];
+const SIZES=[
+  {n:T('קטן','маленький'), ml:350, p:31},
+  {n:T('בינוני','средний'), ml:500, p:38},
+  {n:T('גדול','большой'), ml:780, p:56},
+];
+const MIXES=[
+  T('מיקס עגבניות וכתומים','микс: томатный + оранжевый'),
+  T('מיקס חרירה ועדשים','микс: харира + чечевичный'),
+  T('מיקס עגבניות וחרירה','микс: томатный + харира'),
+  T('מיקס כתומים ועדשים','микс: оранжевый + чечевичный'),
+];
+const FAKE_MIXES=[
+  T('מיקס תירס ואפונה','микс: кукурузный + гороховый'),
+  T('מיקס "עוף" ועגבניות','микс: «куриный» + томатный'),
+  T('מיקס אפונה ועדשים','микс: гороховый + чечевичный'),
+  T('מיקס תירס וכתומים','микс: кукурузный + оранжевый'),
+];
+const PATTIES=[
+  {n:T('קציצת קינואה וחמוציות','котлета из киноа с клюквой'), i:T('קינואה, גזר, כרוב, בצל, חמוציות, שבבי תפו"א, פטרוזיליה ותבלינים','киноа, морковь, капуста, лук, клюква, картофельные хлопья, петрушка и специи')},
+  {n:T('קציצת סלק','свекольная котлета'), i:T('סלק, תפו"א, שבבי בצל, שבבי תפו"א ותבלינים','свёкла, картофель, луковые хлопья, картофельные хлопья и специи')},
+  {n:T('קציצת חומוס וירקות','котлета из нута с овощами'), i:T('חומוס, גזר, כרוב, בצל, תפו"א, פירורי לחם ותבלינים','нут, морковь, капуста, лук, картофель, панировочные сухари и специи')},
+  {n:T('קציצת כרובית וברוקולי','котлета из цветной капусты и брокколи'), i:T('כרובית, ברוקולי, תפו"א, פירורי לחם ושבבי בצל','цветная капуста, брокколи, картофель, сухари и луковые хлопья')},
+];
+const PROTEIN=[
+  {n:T('קציצת "בקר"','«говяжья» котлета'), i:T('שום כבוש, פטרוזיליה קצוצה, כמון, בהרט, מוסקט, קינמון','маринованный чеснок, рубленая петрушка, кумин, бахарат, мускат, корица')},
+  {n:T('קציצת "דגים"','«рыбная» котлета'), i:T('בצל לבן, נענע קצוצה, כוסברה קצוצה, שום כבוש ושמן זית','белый лук, рубленая мята, рубленая кинза, маринованный чеснок и оливковое масло')},
+  {n:T('קציצת "עוף"','«куриная» котлета'), i:T('בצל מטוגן, פטרוזיליה קצוצה, שום כבוש ושמן זית','жареный лук, рубленая петрушка, маринованный чеснок и оливковое масло')},
+];
+const SIDES=[ // תוספת קטנית ופחמימה
+  {n:T('אורז לבן','белый рис'), i:T('שמן זית ומלח','оливковое масло и соль'), g:false},
+  {n:T('מג\'דרה','маджадра'), i:T('עדשים ובצל מטוגן','чечевица и жареный лук'), g:false},
+  {n:T('קינואה','киноа'), i:T('מיקס קינואה אדומה ולבנה, שמן זית ומלח','микс красной и белой киноа, оливковое масло и соль'), g:false},
+  {n:T('כוסמת','гречка'), i:T('שמן זית ומלח','оливковое масло и соль'), g:false},
+  {n:T('קוסקוס','кускус'), i:T('שמן זית ומלח','оливковое масло и соль'), g:true},
+];
+const EXTRAS=[ // תוספת נוספת
+  {n:T('קרוטונים | שקדי מרק','крутоны | суповые «миндалинки»'), p:5, g:true},
+  {n:T('שבבי בצל מטוגן','хлопья жареного лука'), p:6, g:true},
+  {n:T('לחם פרנה','хлеб френа (марокканский)'), p:11, g:true},
+  {n:T('2 פרוסות לחם כפרי','2 ломтика деревенского хлеба'), p:11, g:true},
+  {n:T('אטריות דקות למרק 100 גרם','тонкая лапша для супа, 100 г'), p:8, g:true},
+  {n:T('טחינה לימונית','лимонная тхина'), p:6, g:false},
+];
+const DRINKS=[
+  {n:T('סודה | מים מינרליים','содовая | минеральная вода'), p:10},
+  {n:T('קוקה קולה | קולה זירו','кока-кола | кола зеро'), p:11},
+  {n:T('ספרייט | ספרייט זירו','спрайт | спрайт зеро'), p:11},
+  {n:T('מים בטעם תפוח / ענבים / אפרסק','вода со вкусом яблока / винограда / персика'), p:12},
+  {n:T('פיוזטי אפרסק','фьюзти персик'), p:12},
+];
+const DESSERTS=[
+  {n:T('משולש שוקולד על בייגלה','шоколадный треугольник на крендельках'), i:T('קרם שוקולד מריר ולבן, על קראנץ\' שוקולד בייגלה, ציפוי נוגט ובייגלה במליחות עדינה','крем из горького и белого шоколада на шоколадно-крендельном хрусте, нуга и слегка солёные крендельки'), p:38},
+  {n:T('עוגת ביסקוויטים לוטוס','бисквитный торт «Лотус»'), i:T('שכבות של קרם וביסקוויטים לוטוס','слои крема и печенья «Лотус»'), p:35},
+];
+const DEALS=[
+  {n:T('עסקית מרק קטן + קציצות ירק / טופו','бизнес-ланч: маленький суп + котлеты / тофу'), p:54},
+  {n:T('עסקית מרק בינוני + קציצות ירק / טופו','бизнес-ланч: средний суп + котлеты / тофу'), p:60},
+  {n:T('עסקית מרק גדול + קציצות ירק / טופו','бизнес-ланч: большой суп + котлеты / тофу'), p:76},
+  {n:T('עסקית מרק קטן + קטנייה','бизнес-ланч: маленький суп + бобовые/гарнир'), p:51},
+  {n:T('עסקית מרק בינוני + קטנייה','бизнес-ланч: средний суп + бобовые/гарнир'), p:57},
+  {n:T('עסקית מרק גדול + קטנייה','бизнес-ланч: большой суп + бобовые/гарнир'), p:74},
+  {n:T('SOUPER BOWL','Супер-боул'), p:66},
+];
+
+// ---------- helpers ----------
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pickOthers=(pool,exclude,k,key=x=>x.he)=>shuffle(pool.filter(x=>key(x)!==key(exclude))).slice(0,k);
+const nearPrices=(p,pool)=>{const s=new Set(pool.filter(x=>x!==p));[p-3,p+2,p+5,p-6,p+8].forEach(x=>x>0&&s.add(x));return shuffle([...s]).slice(0,3)};
+const ils=p=>({plain:`${p} ₪`});
+const Q=(cat,ru,he,correct,wrong,explain)=>({cat,ru,he,opts:shuffle([{...correct,ok:true},...wrong.map(w=>({...w,ok:false}))]),explain});
+
+// ---------- generators ----------
+const GEN={
+  soups:[
+    ()=>{const s=rnd(SOUPS);return Q('Супы','Что входит в этот суп?',s.n.he,s.i,pickOthers(SOUPS,s,3).map(x=>x.i),`<strong>${s.n.he}</strong> (${s.n.ru}): ${s.i.he} (${s.i.ru})`)},
+    ()=>{const s=rnd(SOUPS);return Q('Супы','Какой суп с таким составом?',s.i.he,s.n,pickOthers(SOUPS,s,3).map(x=>x.n),`Это <strong>${s.n.he}</strong> (${s.n.ru}).`)},
+    ()=>Q('Супы','С чем подают все супы?','',T('שקדי מרק / קרוטונים','суповые «миндалинки» / крутоны'),[T('לחם פרנה','хлеб френа'),T('טחינה לימונית','лимонная тхина'),T('אורז לבן','белый рис')],'Все супы и миксы «מגיעים עם שקדי מרק/קרוטונים» — приходят с суповыми «миндалинками» или крутонами.'),
+    ()=>Q('Супы','Какой суп называется «куриным», но курицы в нём нет?','',SOUPS[6].n,pickOthers(SOUPS,SOUPS[6],3).map(x=>x.n),'מרק "עוף" צח — «אינו מכיל עוף» (не содержит курицы).'),
+    ()=>Q('Супы','В каком супе есть имбирь (ג\'ינג\'ר)?','',SOUPS[5].n,pickOthers(SOUPS,SOUPS[5],3).map(x=>x.n),'מרק כתומים אסיאתי: батат, тыква, морковь, лук, порей и имбирь.'),
+    ()=>Q('Супы','В каком супе есть нут (גרגרי חומוס) и кинза?','',SOUPS[3].n,pickOthers(SOUPS,SOUPS[3],3).map(x=>x.n),'חרירה פיקנטי: зелёная чечевица, помидоры, нут, лук, сельдерей, кинза.'),
+    ()=>Q('Супы','В каком супе базилик (בזיליקום)?','',SOUPS[2].n,pickOthers(SOUPS,SOUPS[2],3).map(x=>x.n),'מרק אפונה — сухой горох, горошек, чеснок, морковь, лук, базилик.'),
+    ()=>Q('Супы','В каком супе тимьян (טימין)?','',SOUPS[4].n,pickOthers(SOUPS,SOUPS[4],3).map(x=>x.n),'מרק עגבניות — помидоры, сельдерей, лук и тимьян.'),
+    ()=>{const ok=rnd(MIXES);return Q('Супы','Какой микс — из «рекомендованных» (המומלצים שלנו)?','',ok,shuffle(FAKE_MIXES).slice(0,3),'Рекомендованные: עגבניות+כתומים, חרירה+עדשים, עגבניות+חרירה, כתומים+עדשים. Любой другой микс — «לבחירתכם החופשית».')},
+  ],
+  prices:[
+    ()=>{const s=rnd(SIZES);return Q('Размеры и цены',`Сколько стоит суп/микс размера «${s.n.ru}»?`,s.n.he,ils(s.p),nearPrices(s.p,SIZES.map(x=>x.p)).map(ils),`${s.n.he} (${s.n.ru}) — ${s.ml} мл — ${s.p} ₪`)},
+    ()=>{const s=rnd(SIZES);return Q('Размеры и цены',`Какой объём у размера «${s.n.ru}»?`,s.n.he,{plain:`${s.ml} מ"ל (мл)`},shuffle([350,500,780,400,600,700].filter(x=>x!==s.ml)).slice(0,3).map(m=>({plain:`${m} מ"ל (мл)`})),`${s.n.he} = ${s.ml} мл, ${s.p} ₪`)},
+    ()=>{const s=rnd(SIZES);return Q('Размеры и цены',`Суп за ${s.p} ₪ — это какой размер?`,'',s.n,SIZES.filter(x=>x!==s).map(x=>x.n).concat([T('ענק','огромный')]),`${s.p} ₪ = ${s.n.he} (${s.n.ru}), ${s.ml} мл`)},
+    ()=>{const d=rnd(DRINKS);return Q('Размеры и цены','Сколько стоит напиток?',d.n.he+'\n('+d.n.ru+')',ils(d.p),nearPrices(d.p,[10,11,12,9,13]).map(ils),`${d.n.he} — ${d.p} ₪`)},
+    ()=>{const e=rnd(EXTRAS);return Q('Размеры и цены','Сколько стоит доп. добавка?',e.n.he+'\n('+e.n.ru+')',ils(e.p),nearPrices(e.p,[5,6,8,11]).map(ils),`${e.n.he} — ${e.p} ₪${e.g?' · *גלוטן (глютен)':''}`)},
+    ()=>{const d=rnd(DESSERTS);return Q('Размеры и цены','Сколько стоит десерт?',d.n.he+'\n('+d.n.ru+')',ils(d.p),nearPrices(d.p,[35,38,32,42]).map(ils),`${d.n.he} — ${d.p} ₪`)},
+    ()=>Q('Размеры и цены','Сколько стоят овощные котлеты (3 шт) или тофу?','קציצות ירק 3 יח\' / טופו צרוב',ils(19),[ils(16),ils(22),ils(24)],'Любая קציצת ירק (3 шт) и טופו צרוב 150 г — по 19 ₪.'),
+    ()=>Q('Размеры и цены','Белковые котлеты на основе гороха: сколько штук и почём?','קציצת חלבון על בסיס אפונה',{plain:'4 יח\' — 36 ₪ (4 шт)'},[{plain:'3 יח\' — 19 ₪ (3 шт)'},{plain:'4 יח\' — 38 ₪ (4 шт)'},{plain:'3 יח\' — 36 ₪ (3 шт)'}],'קציצת חלבון על בסיס אפונה — 4 יח\' за 36 ₪.'),
+  ],
+  side:[
+    ()=>{const p=rnd(PATTIES);return Q('Котлеты и гарниры','Что входит в эту котлету?',p.n.he,p.i,pickOthers(PATTIES,p,3).map(x=>x.i),`<strong>${p.n.he}</strong> (${p.n.ru}): ${p.i.he}`)},
+    ()=>{const p=rnd(PATTIES);return Q('Котлеты и гарниры','Какая котлета с таким составом?',p.i.he,p.n,pickOthers(PATTIES,p,3).map(x=>x.n),`Это <strong>${p.n.he}</strong> (${p.n.ru}).`)},
+    ()=>{const p=rnd(PROTEIN);return Q('Котлеты и гарниры','Белковая котлета (на основе гороха) с такими специями — это…',p.i.he,p.n,pickOthers(PROTEIN,p,2).map(x=>x.n).concat([T('קציצת "הודו"','«индюшачья» котлета')]),`${p.n.he} (${p.n.ru}): ${p.i.ru}. Сейчас все три — «מתנצלים, אזל במלאי» (нет в наличии).`)},
+    ()=>Q('Котлеты и гарниры','Как готовят тофу (טופו צרוב)?','',T('בשמן זית ומלח, 150 גרם','на оливковом масле с солью, 150 г'),[T('ברוטב סויה, 200 גרם','в соевом соусе, 200 г'),T('בטחינה, 100 גרם','в тхине, 100 г'),T('מטוגן בפירורי לחם, 150 גרם','в панировке, 150 г')],'טופו צרוב — обжаренный тофу на оливковом масле с солью, 150 г, 19 ₪, без глютена.'),
+    ()=>{const s=rnd(SIDES.filter(x=>x.n.he!=='אורז לבן'&&x.n.he!=='כוסמת'&&x.n.he!=='קוסקוס')) ;return Q('Котлеты и гарниры','Из чего этот гарнир (תוספת קטנית ופחמימה)?',s.n.he,s.i,[T('שמן זית ומלח','оливковое масло и соль'),T('אורז ועדשים ירוקות','рис и зелёная чечевица'),T('בורגול ועגבניות','булгур и помидоры')],`${s.n.he} (${s.n.ru}) — ${s.i.ru}`)},
+    ()=>{const bad=T('פירה','пюре');return Q('Котлеты и гарниры','Какого гарнира НЕТ в «תוספת קטנית ופחמימה»?','',bad,shuffle(SIDES).slice(0,3).map(x=>x.n),'Гарниры: אורז לבן, מג\'דרה, קינואה, כוסמת, קוסקוס.')},
+  ],
+  gluten:[
+    ()=>{const g=rnd([...EXTRAS.filter(x=>x.g),SIDES[4],...PATTIES]);const free=shuffle([...SIDES.filter(x=>!x.g),EXTRAS[5],T('טופו צרוב','обжаренный тофу'),...SOUPS]).slice(0,3);return Q('Глютен','Что из этого СОДЕРЖИТ глютен (*גלוטן)?','',g.n,free.map(x=>x.n||x),`${g.n.he} — помечено *גלוטן. Все супы — 100% веганские и без глютена.`)},
+    ()=>{const f=rnd([T('טופו צרוב','обжаренный тофу'),...SIDES.filter(x=>!x.g).map(x=>x.n),EXTRAS[5].n,...SOUPS.map(x=>x.n)]);const gl=shuffle([...EXTRAS.filter(x=>x.g),SIDES[4],...PATTIES,...DESSERTS]).slice(0,3);return Q('Глютен','Что из этого БЕЗ глютена?','',f,gl.map(x=>x.n),`${f.he} (${f.ru}) — без глютена.`)},
+    ()=>Q('Глютен','Что сказано про все супы в шапке меню?','',T('100% טבעוניים וללא גלוטן','100% веганские и без глютена'),[T('מכילים חלב','содержат молоко'),T('עם ציר עוף','на курином бульоне'),T('ללא מלח','без соли')],'«המרקים עשויים מרכיבים טבעיים בלבד… 100% טבעוניים וללא גלוטן».'),
+  ],
+  deals:[
+    ()=>{const d=rnd(DEALS);return Q('Бизнес-ланчи','Сколько стоит?',d.n.he+'\n('+d.n.ru+')',ils(d.p),nearPrices(d.p,DEALS.map(x=>x.p)).map(ils),`${d.n.he} — ${d.p} ₪`)},
+    ()=>Q('Бизнес-ланчи','Что входит в עסקית (бизнес-ланч)?','עסקית לאורך כל שעות היום',T('מרק לבחירה + קציצות/טופו או קטנייה + שתיה קלה','суп на выбор + котлеты/тофу или гарнир + лёгкий напиток'),[T('מרק + קינוח','суп + десерт'),T('מרק + לחם + קפה','суп + хлеб + кофе'),T('שני מרקים + שתיה','два супа + напиток')],'עסקית весь день: суп любого размера + белковая добавка (котлеты/тофу) или קטנייה + שתיה קלה.'),
+    ()=>Q('Бизнес-ланчи','Что такое SOUPER BOWL (66 ₪)?','',T('מרק 500 מ"ל + תוספת פחמימה + תוספת חלבון','суп 500 мл + углеводный гарнир + белковая добавка'),[T('מרק 780 מ"ל + לחם','суп 780 мл + хлеб'),T('מרק 350 מ"ל + קינוח','суп 350 мл + десерт'),T('מיקס מרקים + שתיה','микс супов + напиток')],'SOUPER BOWL 66 ₪: суп на базе 500 мл + פחמימה (рис/маджадра/киноа/гречка/кускус) + חלבון (тофу/котлеты).'),
+    ()=>{const bad=T('קפה','кофе');return Q('Бизнес-ланчи','Какого напитка НЕТ в бизнес-ланче?','',bad,shuffle(DRINKS).slice(0,3).map(x=>x.n),'Напитки: סודה, מים מינרליים, קוקה קולה/זירו, ספרייט/זירו, פיוזטי אפרסק, вода со вкусом.')},
+    ()=>Q('Бизнес-ланчи','Когда действует עסקית?','',T('לאורך כל שעות היום','весь день'),[T('רק בצהריים','только в обед'),T('רק בערב','только вечером'),T('רק בסופ"ש','только в выходные')],'«עסקית לאורך כל שעות היום!» — весь день.'),
+  ],
+};
+const CATS=[['all','Всё'],['soups','Супы'],['prices','Цены'],['side','Котлеты и гарниры'],['deals','Ланчи'],['gluten','Глютен']];
+
+// ---------- state ----------
+let cat='all', cur=null, answered=false, ok=0, all=0, streak=0, best=0, lastKey='';
+try{best=+localStorage.getItem('rmq-best')||0}catch(e){}
+const $=id=>document.getElementById(id);
+
+function renderText(t){
+  if(t.plain) return `<span class="main">${t.plain}</span>`;
+  return `<span class="he" dir="rtl">${t.he}</span><span class="ru">(${t.ru})</span>`;
+}
+function newQ(){
+  const pool=cat==='all'?Object.values(GEN).flat():GEN[cat];
+  let q,k,tries=0;
+  do{const g=rnd(pool);q=g();k=q.ru+q.he+q.opts.find(o=>o.ok).he;tries++}while(k===lastKey&&tries<8);
+  lastKey=k; cur=q; answered=false;
+  $('tag').textContent=q.cat;
+  const heLines=q.he?q.he.split('\n'):[];
+  $('q').innerHTML=q.ru+(heLines.length?`<span class="he" dir="rtl">${heLines[0]}</span>`+(heLines[1]?`<span class="ru" style="display:block;font-size:15px;color:var(--muted);font-weight:400">${heLines[1]}</span>`:''):'');
+  $('opts').innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(o.plain?' plain':''); b.id='opt'+i;
+    b.innerHTML=renderText(o);
+    b.onclick=()=>answer(i);
+    $('opts').appendChild(b);
+  });
+  $('explain').hidden=true; $('next').hidden=true;
+  $('hint').textContent='Выбери ответ · клавиши 1–'+q.opts.length;
+}
+function answer(i){
+  if(answered) return; answered=true;
+  const right=cur.opts[i].ok;
+  all++; if(right){ok++;streak++;if(streak>best){best=streak;try{localStorage.setItem('rmq-best',best)}catch(e){}}} else streak=0;
+  [...$('opts').children].forEach((b,j)=>{b.disabled=true;if(cur.opts[j].ok)b.classList.add('ok');else if(j===i)b.classList.add('no')});
+  $('explain').innerHTML=(right?'<strong>Верно!</strong> ':'<strong>Не то.</strong> ')+cur.explain;
+  $('explain').hidden=false; $('next').hidden=false; $('next').focus();
+  $('hint').textContent='Enter — дальше';
+  stats();
+}
+function stats(){
+  $('sOk').textContent=ok;$('sAll').textContent=all;$('sStreak').textContent=streak;$('sBest').textContent=best;
+  $('bar').style.width=(all?Math.round(ok/all*100):0)+'%';
+}
+CATS.forEach(([k,l])=>{
+  const b=document.createElement('button');b.id='cat-'+k;b.textContent=l;b.setAttribute('aria-pressed',k===cat);
+  b.onclick=()=>{cat=k;document.querySelectorAll('#cats button').forEach(x=>x.setAttribute('aria-pressed',x===b));newQ()};
+  $('cats').appendChild(b);
+});
+$('next').onclick=newQ;
+document.addEventListener('keydown',e=>{
+  if(!answered&&/^[1-4]$/.test(e.key)&&cur.opts[+e.key-1]) answer(+e.key-1);
+  else if(answered&&(e.key==='Enter'||e.key===' ')&&document.activeElement!==$('next')){e.preventDefault();newQ()}
+});
+stats(); newQ();
+</script>
